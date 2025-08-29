@@ -1,6 +1,9 @@
-// Heatmap-Skizze für Indikatoren × Dimensionen
-// Jeder Indikator gehört zu zwei Dimensionen (z. B. „Integration and acceptance“ → Culture & Society und Rights & Dignity). (Spalte S, T )
-// Die Votes (z. B. Male: 1, Female: 1, Youth: 3) beziehen sich auf den Indikator insgesamt, nicht separat pro Dimension.
+/**
+ * Heatmap-Skizze für Indikatoren × Dimensionen
+ * Jeder Indikator gehört zu zwei Dimensionen (Spalten S, T im Original Excel).
+ * Die Votes (M, F, Y, T) beziehen sich auf den Indikator insgesamt,
+ * nicht separat pro Dimension.
+ */
 
 let datasets = {};
 let currentDataset = "Blagaj-LT";
@@ -18,6 +21,11 @@ let beschriftungBreite = 180;
 
 
 
+/**
+ * Lädt CSV-Dateien mit Indikatoren-Daten.
+ * Die Daten werden als Roh-Strings in das datasets-Objekt geladen,
+ * später in prepareData() aufbereitet.
+ */
 function preload() {
   //loadStrings weil .csv semicolon als Trennzeichen hat
   //table = loadStrings("../data/indicators-dimensions-blagajLT.csv");
@@ -31,7 +39,9 @@ function preload() {
   datasets["Zalik-P"] = loadStrings("../data/indicators-dimensions-ZalikP.csv");
 }
 
-
+/**
+ * Initialisiert das Canvas, filtert die Daten, rechnet die Zellbreiten und baut das Dropdown-Menü.
+ */
 function setup() {
   createCanvas(windowWidth, windowHeight * 2);
 
@@ -62,6 +72,10 @@ function setup() {
 
 }
 
+/**
+ * Hauptzeichenschleife von p5.js
+ * Zeichnet die Achsen, Heatmap und ggf. Infobox für Hover.
+ */
 function draw() {
   background(255);
 
@@ -85,6 +99,13 @@ function draw() {
   drawInfoBox();
 }
 
+/**
+ * Bereitet die Daten für das aktuell ausgewählte Dataset auf.
+ * Liest die Rohdaten-Zeilen aus datasets[currentDataset],
+ * parst sie und baut daraus das indicators-Array.
+ *
+ * @return {void}
+ */
 function prepareData() {
   maxTotal = 0;
   indicators = [];
@@ -130,12 +151,26 @@ function prepareData() {
   }
 }
 
+/**
+ * Berechnet die Layout-Parameter für Heatmap-Zellen.
+ *
+ * @return {void}
+ */
 function prepareLayout() {
   //layout
   cellW = (width - 2 * layoutBorder - beschriftungBreite) / dimensions.length;
   cellH = (height - 2 * layoutBorder) / indicators.length;
 }
 
+/**
+ * Zeichnet die Heatmap:
+ * - Zeilen = Indikatoren
+ * - Spalten = Dimensionen
+ * - Zellen werden eingefärbt je nach total votes
+ * - Hover wird erkannt und gespeichert
+ *
+ * @return {void}
+ */
 function drawHeatmap() {
   hoveredIndicator = null;
 
@@ -171,6 +206,11 @@ function drawHeatmap() {
   }
 }
 
+/**
+ * Zeichnet eine Infobox mit Detailinfos über dem aktuell gehoverten Indikator.
+ *
+ * @return {void}
+ */
 function drawInfoBox() {
   // Hover-Info Box
   if (hoveredIndicator) {
@@ -193,6 +233,14 @@ function drawInfoBox() {
     pop();
   }
 }
+
+/**
+ * Hilfsfunktion: zählt, wie viele Zeilen ein Text nach Wort-Wrapping benötigt.
+ *
+ * @param {string} txt - Der Text, der geprüft wird.
+ * @param {number} maxWidth - Maximale Breite in Pixeln pro Zeile.
+ * @return {number} Anzahl Zeilen, die der Text benötigt.
+ */
 function countLines(txt, maxWidth) {
   let words = splitTokens(txt, " ");
   let currentLine = "";
