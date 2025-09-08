@@ -1,6 +1,7 @@
+// Globale Variable für die geladenen Daten
 let data = {};
 
-// Colors for different dimensions
+// Farben für verschiedene Dimensionen
 const dimensionColors = {
   "Economic Activity & Livelihoods": "#FF6B6B",
   "Dealing with the Past": "#4ECDC4",
@@ -11,29 +12,31 @@ const dimensionColors = {
   null: "#C0C0C0",
 };
 
-// Settings for layout
-let padding = 20;
-let rectWidth = 10;
-let rectHeight = 10;
-let spacing = 2;
-let textHeight = 12;
+// Einstellungen für das Layout
+let padding = 20; // Abstand zu den Rändern
+let rectWidth = 10; // Breite der Rechtecke
+let rectHeight = 10; // Höhe der Rechtecke
+let spacing = 2; // Abstand zwischen Rechtecken
+let textHeight = 12; // Höhe des Texts
 
+// Funktion die vor setup() ausgeführt wird - lädt die JSON-Datei
 function preload() {
   data = loadD3JSON("data/combined-data.json");
-  console.log("yay");
+  console.log("Daten werden geladen...");
 }
 
+// Hauptinitialisierung - wird einmal am Anfang ausgeführt
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  background(255);
+  background(255); // Weißer Hintergrund
 
-  console.log("Data loaded:", data);
+  console.log("Daten geladen:", data);
 
-  // Sort data by location first, then by dimension
+  // Sortiere Daten erst nach Community, dann nach Dimension, dann nach Subdimension
   let sortedData = sortData(data);
-  console.log("sorted data:", sortedData);
+  console.log("Sortierte Daten:", sortedData);
 
-  // Draw the visualization
+  // Zeichne die Visualisierung
   drawVisualization(sortedData);
 }
 
@@ -42,162 +45,147 @@ function sortData(inputData) {
   // Erstelle Kopie des Arrays und sortiere sie
   return [...inputData].sort((a, b) => {
     // Extrahiere Vergleichswerte (mit Fallback auf leeren String)
-    let locationA = a["Community"] || "";
-    let locationB = b["Community"] || "";
+    let communityA = a["Community"] || "";
+    let communityB = b["Community"] || "";
     let dimensionA = a["Dimension 1"] || "";
     let dimensionB = b["Dimension 1"] || "";
     let subdimensionA = a["Subcat 1 name"] || "";
     let subdimensionB = b["Subcat 1 name"] || "";
 
     // Vergleiche die Werte alphabetisch
-    let locationComparison = locationA.localeCompare(locationB);
+    let communityComparison = communityA.localeCompare(communityB);
     let dimComparison = dimensionA.localeCompare(dimensionB);
     let subdimComparison = subdimensionA.localeCompare(subdimensionB);
 
-    // Sortierreihenfolge: Erst Location, dann Dimension, dann Subdimension
-    if (locationComparison === 0) {
-      // Gleiche Location?
+    // Sortierreihenfolge: Erst Community, dann Dimension, dann Subdimension
+    if (communityComparison === 0) {
+      // Gleiche Community?
       if (dimComparison === 0) {
         // Gleiche Dimension?
         return subdimComparison; // Sortiere nach Subdimension
       }
       return dimComparison; // Sortiere nach Dimension
     }
-    return locationComparison; // Sortiere nach Location
+    return communityComparison; // Sortiere nach Community
   });
 }
 
-// function sortData(inputData) {
-//   return [...inputData].sort((a, b) => {
-//     let locationA = a.location || "";
-//     let locationB = b.location || "";
-//     let dimensionA = a["Dimension 1"] || "";
-//     let dimensionB = b["Dimension 1"] || "";
-
-//     // Sort by location first
-//     let locationComparison = locationA.localeCompare(locationB);
-
-//     // If locations are the same, sort by dimension
-//     if (locationComparison === 0) {
-//       return dimensionA.localeCompare(dimensionB);
-//     }
-
-//     return locationComparison;
-//   });
-// }
-
+// Hauptfunktion zum Zeichnen der Visualisierung
 function drawVisualization(sortedData) {
-  let x = padding;
-  let y = padding;
-
+  let x = padding; // Startposition X
+  let y = padding; // Startposition Y
   textSize(10);
 
-  let currentLocation = "";
+  let currentCommunity = "";
   let currentDimension = "";
 
+  // Gehe durch alle sortierten Daten
   for (let i = 0; i < sortedData.length; i++) {
     let item = sortedData[i];
-    let location = item.Community || "unknown";
+    let community = item.Community || "unknown";
     let dimension = item["Dimension 1"] || "null";
 
-    // Check if we need to start a new section
-    let needsNewLocation = location !== currentLocation;
-    let needsNewDimension = dimension !== currentDimension && location === currentLocation;
+    // Prüfe ob neue Sektion nötig ist
+    let needsNewCommunity = community !== currentCommunity;
+    let needsNewDimension = dimension !== currentDimension && community === currentCommunity;
 
-    // Start new location section
-    if (needsNewLocation) {
-      x = padding;
-      y += rectHeight * 5; // Extra space between locations
+    // Neue Community-Sektion beginnen
+    if (needsNewCommunity) {
+      x = padding; // Zurück zum linken Rand
+      y += rectHeight * 5; // Extra Platz zwischen Communities
 
-      // Draw location label
-      fill(0);
-      text(location, x, y);
+      // Zeichne Community-Label
+      fill(0); // Schwarzer Text
+      text(community, x, y);
       y += textHeight + 5;
 
-      // Draw dimension label
+      // Zeichne Dimension-Label
       text(dimension, x, y);
       y += 5;
 
-      currentLocation = location;
+      currentCommunity = community;
       currentDimension = dimension;
     }
-    // Start new dimension section (same location)
+    // Neue Dimension-Sektion (gleiche Community)
     else if (needsNewDimension) {
-      x = padding;
-      y += rectHeight + textHeight; // Small space between dimensions
+      x = padding; // Zurück zum linken Rand
+      y += rectHeight + textHeight; // Kleiner Platz zwischen Dimensionen
 
-      // Draw dimension label
-      fill(0);
+      // Zeichne Dimension-Label
+      fill(0); // Schwarzer Text
       text(dimension, x, y);
       y += 5;
 
       currentDimension = dimension;
     }
 
-    // Draw the data rectangle
+    // Zeichne das Daten-Rechteck
     fill(dimensionColors[dimension]);
     rect(x, y, rectWidth, rectHeight);
 
-    // Move to next position
+    // Bewege zur nächsten Position
     x += rectWidth + spacing;
 
-    // Wrap to next line if needed
+    // Neue Zeile wenn nötig
     if (x > width - rectWidth - padding) {
       x = padding;
       y += rectHeight + spacing;
     }
   }
 
-  // Draw legend
+  // Zeichne die Legende
   drawLegend();
 }
 
+// Funktion zum Zeichnen der Legende
 function drawLegend() {
-  let legendX = width - 200;
+  let legendX = width - 200; // Position rechts im Canvas
   let legendY = 50;
 
-  fill(0);
+  // Legende-Titel
+  fill(0); // Schwarzer Text
   textSize(12);
-  text("Legend:", legendX, legendY);
-
+  text("Legende:", legendX, legendY);
   legendY += 20;
+
   textSize(10);
 
-  // Draw color squares and labels for each dimension
+  // Zeichne Farbquadrate und Labels für jede Dimension
   let dimensionNames = Object.keys(dimensionColors);
-
   for (let i = 0; i < dimensionNames.length; i++) {
     let dimension = dimensionNames[i];
 
-    // Skip null entries in legend
+    // Überspringe null-Einträge in der Legende
     if (dimension === "null") continue;
 
-    // Draw color square
+    // Zeichne Farbquadrat
     fill(dimensionColors[dimension]);
     rect(legendX, legendY, rectWidth, rectHeight);
 
-    // Draw label
-    fill(0);
+    // Zeichne Label
+    fill(0); // Schwarzer Text
     text(dimension, legendX + rectWidth + 10, legendY + rectHeight);
-
     legendY += rectHeight + 5;
   }
 }
 
+// Hilfsfunktion um eindeutige Werte einer Eigenschaft zu finden
 function getUniqueValues(data, property) {
   return [...new Set(data.map((item) => item[property]))];
 }
 
+// Funktion um Informationen über die Daten in der Konsole auszugeben
 function logDataInfo() {
-  let uniqueLocations = getUniqueValues(data, "location");
+  let uniqueCommunities = getUniqueValues(data, "Community");
   let uniqueConcepts = getUniqueValues(data, "Concept");
   let uniqueDimensions = getUniqueValues(data, "Dimension 1");
 
-  console.log("Unique locations:", uniqueLocations);
-  console.log("Unique concepts:", uniqueConcepts);
-  console.log("Unique dimensions:", uniqueDimensions);
+  console.log("Eindeutige Communities:", uniqueCommunities);
+  console.log("Eindeutige Konzepte:", uniqueConcepts);
+  console.log("Eindeutige Dimensionen:", uniqueDimensions);
 }
 
+// Zeichenfunktion - wird kontinuierlich ausgeführt
 function draw() {
-  // No animation needed - everything drawn in setup
+  // Keine Animation nötig - alles wird in setup() gezeichnet
 }
