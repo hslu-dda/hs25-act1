@@ -5,14 +5,19 @@
  * nicht separat pro Dimension.
  */
 
-let datasets = {};
-let currentDataset = "Blagaj-LT";
-let dropdown;
+let rawData; // das komplette JSON
+
+let currentDataset = "blagajLT";
+let currentGroup = "total";
+
+let dropdown, groupdropdown;
+let groups = { "T": "total", "M": "male", "F": "female", "Y": "youth" };
+
 
 let dimensions = ["Culture & Society", "Security", "Rights & Dignity", "Armed Actors", "Dealing with the Past", "Economic Activity & Livelihoods"];
-let indicators = [];     // Array von Daten-Objekten {name:s, male: n, female: n, youth: n, total:n,  dim: [n, n]}
+
 let hoveredIndicator = null;
-let maxTotal = 0;
+let currentMax = 0;
 let colorMin, colorMax;
 
 let layoutBorder = 50;
@@ -20,23 +25,15 @@ let cellW, cellH;
 let beschriftungBreite = 180;
 
 
-
 /**
- * Lädt CSV-Dateien mit Indikatoren-Daten.
- * Die Daten werden als Roh-Strings in das datasets-Objekt geladen,
- * später in prepareData() aufbereitet.
+ * Lädt alle Datensets aus einem JSON
+ * loadJSON gibt ein Objekt zurück rawData
  */
 function preload() {
-  //loadStrings weil .csv semicolon als Trennzeichen hat
-  //table = loadStrings("../data/indicators-dimensions-blagajLT.csv");
-  datasets["Blagaj-LT"] = loadStrings("../data/indicators-dimensions-blagajLT.csv");
-  datasets["Blagaj-P"] = loadStrings("../data/indicators-dimensions-blagajP.csv");
-  datasets["Podhum-LT"] = loadStrings("../data/indicators-dimensions-podhumLT.csv");
-  datasets["Podhum-P"] = loadStrings("../data/indicators-dimensions-podhumP.csv"); 
-  datasets["Bulivar-Cernica-LT"] = loadStrings("../data/indicators-dimensions-bulivarCernicaLT.csv");
-  datasets["Bulivar-Cernica-P"] = loadStrings("../data/indicators-dimensions-bulivarCernicaP.csv");
-  datasets["Zalik-LT"] = loadStrings("../data/indicators-dimensions-ZalikLT.csv");
-  datasets["Zalik-P"] = loadStrings("../data/indicators-dimensions-ZalikP.csv");
+
+  //loadJSON gibt ein Objekt zurück
+  rawData = loadJSON("../data/mostar-combined.json");
+
 }
 
 /**
@@ -45,23 +42,35 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight * 2);
 
-  prepareData();
   prepareLayout();
-
-  // Dropdown erstellen
+  // Dropdown Datensets erstellen
   dropdown = createSelect();
   dropdown.position(layoutBorder, 10);
-  // Alle Keys aus dem Objekt holen und als Option einfügen
-  Object.keys(datasets).forEach(key => {
-    dropdown.option(key);
-  });
+  let rows = Object.values(rawData);
+
+  // Alle Locations extrahieren ["blagajLT", "blagajLT", "blagajP", "blagajP", "zalikLT", ...]
+  // Ein Set ist in JavaScript eine Datenstruktur, die nur eindeutige Werte speichert
+  let locations = [...new Set(rows.map(r => r.location))];
+  //Dropdown options kreieren
+  locations.forEach(loc => dropdown.option(loc));
   dropdown.selected(currentDataset);
   dropdown.changed(() => {
     currentDataset = dropdown.value();
-    prepareData();
     prepareLayout();
   });
 
+
+  //Dropdown soziale Gruppen
+  groupdropdown = createSelect();
+  groupdropdown.position(layoutBorder + 200, 10);
+  Object.keys(groups).forEach(key => {
+    groupdropdown.option(groups[key]);
+  });
+  groupdropdown.selected(currentGroup);
+  groupdropdown.changed(() => {
+    currentGroup = groupdropdown.value();
+
+  });
 
 
   colorMin = color(0, 100, 255, 200);
@@ -100,54 +109,37 @@ function draw() {
 }
 
 /**
- * Bereitet die Daten für das aktuell ausgewählte Dataset auf.
- * Liest die Rohdaten-Zeilen aus datasets[currentDataset],
- * parst sie und baut daraus das indicators-Array.
+ * Gibt die Indikatoren des aktuellen Datensatzes zurück.
+ * Filtert direkt aus rawData.
  *
- * @return {void}
+ * @return {Array<Object>} Array von Indikatoren
  */
-function prepareData() {
-  maxTotal = 0;
-  indicators = [];
-  let table = datasets[currentDataset];
-  //Daten aufbereiten
-  for (let i = 1; i < table.length; i++) {
-    let cols = table[i].split(";");
-    let name = cols[0];
-    let male = int(cols[3]) > 0 ? int(cols[3]) : 0;
-    let female = int(cols[4]) > 0 ? int(cols[4]) : 0;
-    let youth = int(cols[5]) > 0 ? int(cols[5]) : 0;
-    let total = int(cols[6]) > 0 ? int(cols[6]) : 0;
-    let d1Name = cols[7];
-    let d2Name = cols[8];
+function getCurrentIndicators() {
+  let rows = Object.values(rawData).filter(r => r.location === currentDataset);
 
-    //maximales Total Zustimmung über alle Indikatoren
-    if (total > maxTotal) {
-      maxTotal = total;
-    }
+  // maximale Werte für aktuelle Gruppe berechnen
+  currentMax = 0;
+  rows.forEach(r => {
+    let val = groupValue(r, currentGroup);
+    if (val > currentMax) currentMax = val;
+  });
 
-    //Dimensionen als index im dimensions Array 
-    let d1 = -1;
-    let d2 = -1;
+  return rows;
+}
 
-    if (d1Name != '') {
-      d1 = dimensions.indexOf(d1Name);
-    }
-    if (d2Name != '') {
-      d2 = dimensions.indexOf(d2Name);
-    }
-
-
-    // indicators mit Dimensionen
-    indicators.push({
-      name: name,
-      male: male,
-      female: female,
-      youth: youth,
-      total: total,
-      dim: [d1, d2]
-    });
-
+/**
+ * Holt den Wert einer sozialen Gruppe aus einem Datensatz.
+ *
+ * @param {Object} row - Ein Datensatz/Indikator
+ * @param {string} group - "male" | "female" | "youth" | "total"
+ * @return {number} Stimmenanzahl
+ */
+function groupValue(row, group) {
+  switch (group) {
+    case "male": return int(row.M) || 0;
+    case "female": return int(row.F) || 0;
+    case "youth": return int(row.Y) || 0;
+    default: return int(row.T) || 0;
   }
 }
 
@@ -157,9 +149,11 @@ function prepareData() {
  * @return {void}
  */
 function prepareLayout() {
-  //layout
+
   cellW = (width - 2 * layoutBorder - beschriftungBreite) / dimensions.length;
-  cellH = (height - 2 * layoutBorder) / indicators.length;
+  let rows = getCurrentIndicators();
+  cellH = (height - 2 * layoutBorder) / rows.length;
+
 }
 
 /**
@@ -173,34 +167,44 @@ function prepareLayout() {
  */
 function drawHeatmap() {
   hoveredIndicator = null;
-
+  let rows = getCurrentIndicators();
+  //console.log(rows)
   // Heatmap zeichnen
-  for (let i = 0; i < indicators.length; i++) {
-    // Label für Indikator (Y-Achse)
-    textAlign(RIGHT, CENTER);
-    textSize(10);
-    fill(0);
-    text(indicators[i].name.substring(0, 30) + " ... ", beschriftungBreite, i * cellH + cellH / 2);
+  for (let i = 0; i < rows.length; i++) {
+    let row = rows[i];
+    let name = row["Indicator English"];
+    let d1 = dimensions.indexOf(row["Dimension 1"]);
+    let d2 = dimensions.indexOf(row["Dimension 2"]);
+    let val = groupValue(row, currentGroup);
 
+    if (val > 0) {
+      // Label für Indikator
+      textAlign(RIGHT, CENTER);
+      textSize(10);
+      fill(0);
+      text(name.substring(0, 30) + " ... ", beschriftungBreite, i * cellH + cellH / 2);
 
-    for (let d = 0; d < dimensions.length; d++) {
-      // Nur dann einfärben, wenn diese Dimension zum Indikator gehört
-      if (indicators[i].dim.includes(d)) {
-        noStroke();
-        //Hover auf eingefärbten Zellen checken 
-        if (mouseX > beschriftungBreite + layoutBorder + d * cellW && mouseX < beschriftungBreite + layoutBorder + (d + 1) * cellW && mouseY > layoutBorder + i * cellH && mouseY < layoutBorder + (i + 1) * cellH) {
-          hoveredIndicator = indicators[i];
-          fill(0, 220);
+      // Alle Spalten
+      for (let d = 0; d < dimensions.length; d++) {
+        if ([d1, d2].includes(d)) {
+          noStroke();
+          if (mouseX > beschriftungBreite + layoutBorder + d * cellW &&
+            mouseX < beschriftungBreite + layoutBorder + (d + 1) * cellW &&
+            mouseY > layoutBorder + i * cellH &&
+            mouseY < layoutBorder + (i + 1) * cellH) {
+            hoveredIndicator = { row, val };
+            fill(0, 220);
+          } else {
+            let l = map(val, 0, currentMax, 0, 1);
+            let c = lerpColor(colorMin, colorMax, l);
+            fill(c);
+          }
+          rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
         } else {
-          let l = map(indicators[i].total, 0, maxTotal, 0, 1); // 0–maxTotal Stimmen → Farbskala
-          let c = lerpColor(colorMin, colorMax, l)
-          fill(c);
+          noFill();
+          stroke(230);
+          rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
         }
-        rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
-      } else {
-        noFill();
-        stroke(230);
-        rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
       }
     }
   }
@@ -215,8 +219,8 @@ function drawInfoBox() {
   // Hover-Info Box
   if (hoveredIndicator) {
     noStroke();
-    let ind = hoveredIndicator;
-    let lines = countLines(ind.name, 250);
+    let ind = hoveredIndicator.row;
+    let lines = countLines(ind["Indicator English"], 250);
     fill(50, 220);
     rect(mouseX + 10, mouseY, 255, (4 + lines) * 15 + 5, 8);
     fill(255);
@@ -225,11 +229,11 @@ function drawInfoBox() {
     textSize(12);
     push();
     translate(0, 5);
-    text(ind.name, mouseX + 15, mouseY, 250);
-    text("Male: " + ind.male, mouseX + 15, mouseY + lines * 15);
-    text("Female: " + ind.female, mouseX + 15, mouseY + (lines + 1) * 15);
-    text("Youth: " + ind.youth, mouseX + 15, mouseY + (lines + 2) * 15);
-    text("Total: " + ind.total, mouseX + 15, mouseY + + (lines + 3) * 15);
+    text(ind["Indicator English"], mouseX + 15, mouseY, 250);
+    text("Male: " + (int(ind.M) || 0), mouseX + 15, mouseY + lines * 15);
+    text("Female: " + (int(ind.F) || 0), mouseX + 15, mouseY + (lines + 1) * 15);
+    text("Youth: " + (int(ind.Y) || 0), mouseX + 15, mouseY + (lines + 2) * 15);
+    text("Total: " + (int(ind.T) || 0), mouseX + 15, mouseY + + (lines + 3) * 15);
     pop();
   }
 }
