@@ -38,18 +38,22 @@ function setup() {
   );
   console.log("Verbundene Daten:", dataArray);
 
-  // Bereinige Inkonsistenzen in den Daten
+  const keyReplacements = [
+    ["Total", "T"],
+    ["Indicator_Eng", "Indicator English"],
+    ["Focus_Group", "Focus Group"],
+  ];
+
   dataArray.forEach((item) => {
-    Object.keys(item).forEach((key) => {
-      // Nur Strings bearbeiten
-      if (typeof item[key] === "string") {
-        item[key] = item[key]
-          .replace(/Total/g, "T") // Ersetze "Total" mit "T"
-          .replace(/Indicator_Eng/g, "Indicator English") // Bessere Spaltennamen
-          .replace(/Focus_Group/g, "Focus Group");
+    // Loop through each replacement pair
+    keyReplacements.forEach(([oldKey, newKey]) => {
+      if (oldKey in item) {
+        item[newKey] = item[oldKey];
+        delete item[oldKey];
       }
     });
   });
+
   console.log("Bereinigte Daten:", dataArray);
 
   // Sortiere die Daten

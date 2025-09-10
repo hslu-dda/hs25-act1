@@ -1,6 +1,8 @@
 .DS_Store
 .vscode
 ./*/node_modules
-osc-minimal/node_modules
-/data/
+# Data folders at any depth
+data/
 **/data/
+/data/
+
