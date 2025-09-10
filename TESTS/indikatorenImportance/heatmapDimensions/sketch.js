@@ -1,7 +1,7 @@
 /**
  * Heatmap-Skizze für Indikatoren × Dimensionen
  * Jeder Indikator gehört zu zwei Dimensionen (Spalten S, T im Original Excel).
- * Die Votes (M, F, Y, T) beziehen sich auf den Indikator insgesamt,
+ * Die Importance Scores (M, F, Y, T) beziehen sich auf den Indikator insgesamt,
  * nicht separat pro Dimension.
  */
 
@@ -32,7 +32,7 @@ let beschriftungBreite = 180;
 function preload() {
 
   //loadJSON gibt ein Objekt zurück
-  rawData = loadJSON("../data/mostar-combined.json");
+  rawData = loadJSON("../data/combined-data.json");
 
 }
 
@@ -50,7 +50,7 @@ function setup() {
 
   // Alle Locations extrahieren ["blagajLT", "blagajLT", "blagajP", "blagajP", "zalikLT", ...]
   // Ein Set ist in JavaScript eine Datenstruktur, die nur eindeutige Werte speichert
-  let locations = [...new Set(rows.map(r => r.location))];
+  let locations = [...new Set(rows.map(r => r.Community))];
   //Dropdown options kreieren
   locations.forEach(loc => dropdown.option(loc));
   dropdown.selected(currentDataset);
@@ -69,7 +69,8 @@ function setup() {
   groupdropdown.selected(currentGroup);
   groupdropdown.changed(() => {
     currentGroup = groupdropdown.value();
-
+    //console.log(currentGroup)
+    
   });
 
 
@@ -109,26 +110,26 @@ function draw() {
 }
 
 /**
- * Gibt die Indikatoren des aktuellen Datensatzes zurück.
+ * Gibt die Maximum Importance Scores des aktuellen Sets – gefiltert nach Locatoin und sozialer Gruppe – zurück.
  * Filtert direkt aus rawData.
  *
  * @return {Array<Object>} Array von Indikatoren
  */
 function getCurrentIndicators() {
-  let rows = Object.values(rawData).filter(r => r.location === currentDataset);
+  let rows = Object.values(rawData).filter(r => r.Community === currentDataset);
 
   // maximale Werte für aktuelle Gruppe berechnen
   currentMax = 0;
   rows.forEach(r => {
     let val = groupValue(r, currentGroup);
-    if (val > currentMax) currentMax = val;
+     if (val > currentMax) currentMax = val;
   });
 
   return rows;
 }
 
 /**
- * Holt den Wert einer sozialen Gruppe aus einem Datensatz.
+ * Holt den Importance Score einer sozialen Gruppe aus einem Indikator.
  *
  * @param {Object} row - Ein Datensatz/Indikator
  * @param {string} group - "male" | "female" | "youth" | "total"
@@ -136,10 +137,10 @@ function getCurrentIndicators() {
  */
 function groupValue(row, group) {
   switch (group) {
-    case "male": return int(row.M) || 0;
-    case "female": return int(row.F) || 0;
-    case "youth": return int(row.Y) || 0;
-    default: return int(row.T) || 0;
+    case "male": return float(row["Imp-M"]) || 0;
+    case "female": return float(row["Imp-F"]) || 0;
+    case "youth": return float(row["Imp-Y"]) || 0;
+    default: return float(row["Imp score"]) || 0;
   }
 }
 
@@ -177,7 +178,7 @@ function drawHeatmap() {
     let d2 = dimensions.indexOf(row["Dimension 2"]);
     let val = groupValue(row, currentGroup);
 
-    if (val > 0) {
+   if (val > 0) {
       // Label für Indikator
       textAlign(RIGHT, CENTER);
       textSize(10);
@@ -207,7 +208,7 @@ function drawHeatmap() {
         }
       }
     }
-  }
+ }
 }
 
 /**
@@ -230,10 +231,10 @@ function drawInfoBox() {
     push();
     translate(0, 5);
     text(ind["Indicator English"], mouseX + 15, mouseY, 250);
-    text("Male: " + (int(ind.M) || 0), mouseX + 15, mouseY + lines * 15);
-    text("Female: " + (int(ind.F) || 0), mouseX + 15, mouseY + (lines + 1) * 15);
-    text("Youth: " + (int(ind.Y) || 0), mouseX + 15, mouseY + (lines + 2) * 15);
-    text("Total: " + (int(ind.T) || 0), mouseX + 15, mouseY + + (lines + 3) * 15);
+    text("Male: " + (int(ind.M) || 0) + " – Importance Sc. Male " + float(ind["Imp-M"]), mouseX + 15, mouseY + lines * 15);
+    text("Female: " + (int(ind.F) || 0)+ " – Importance Sc. Female " + float(ind["Imp-F"]), mouseX + 15, mouseY + (lines + 1) * 15);
+    text("Youth: " + (int(ind.Y) || 0)+ " – Importance Sc. Youth " + float(ind["Imp-Y"]), mouseX + 15, mouseY + (lines + 2) * 15);
+    text("Total: " + (int(ind.T) || 0)+ " – Importance Sc. " + float(ind["Imp score"]), mouseX + 15, mouseY + + (lines + 3) * 15);
     pop();
   }
 }
