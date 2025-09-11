@@ -27,7 +27,7 @@ function preload() {
 
 // Hauptinitialisierung - wird einmal am Anfang ausgeführt
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, 2000);
   background(255); // Weißer Hintergrund
 
   console.log("Daten geladen:", data);
@@ -84,6 +84,8 @@ function drawVisualization(sortedData) {
     let item = sortedData[i];
     let community = item.Community || "unknown";
     let dimension = item["Dimension 1"] || "null";
+
+    console.log(community, currentCommunity);
 
     // Prüfe ob neue Sektion nötig ist
     let needsNewCommunity = community !== currentCommunity;
