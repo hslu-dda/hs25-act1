@@ -1,21 +1,18 @@
 /**
  * Heatmap-Skizze für Indikatoren × Dimensionen
  * Jeder Indikator gehört zu zwei Dimensionen (Spalten S, T im Original Excel).
- * Die Importance Scores (M, F, Y, T) beziehen sich auf den Indikator insgesamt,
- * nicht separat pro Dimension.
+ * Importance Scores werden pro Kategorie (Imp_Cat1,Imp_Cat2) auf die beiden Dimensionen übertragen
  */
 
 let rawData; // das komplette JSON
 
-let currentDataset = "blagajLT";
+let currentDataset = "zalikLT";
 let currentGroup = "total";
 
-let dropdown, groupdropdown;
-let groups = { "T": "total", "M": "male", "F": "female", "Y": "youth" };
+let dropdown;
 
 
-let dimensions = ["Culture & Society", "Security", "Rights & Dignity", "Armed Actors", "Dealing with the Past", "Economic Activity & Livelihoods"];
-
+let dimensions = new Set();
 let hoveredIndicator = null;
 let currentMax = 0;
 let colorMin, colorMax;
@@ -24,6 +21,7 @@ let layoutBorder = 50;
 let cellW, cellH;
 let beschriftungBreite = 180;
 
+let codesHierarchy;
 
 /**
  * Lädt alle Datensets aus einem JSON
@@ -32,8 +30,8 @@ let beschriftungBreite = 180;
 function preload() {
 
   //loadJSON gibt ein Objekt zurück
-  rawData = loadJSON("../data/combined-data.json");
-
+  rawData = loadJSON("../data/_combined-data.json");
+  codesHierarchy = loadJSON("../data/tree_combined.json")
 }
 
 /**
@@ -41,12 +39,26 @@ function preload() {
  */
 function setup() {
   createCanvas(windowWidth, windowHeight * 2);
+  //console.log(codesHierarchy)
+  //Dimensionen 
+  for (let key of Object.entries(codesHierarchy)) {
+    dimensions.add(key[0]);
 
+  }
+
+  dimensions = [...dimensions];
+
+  //console.log(dimensions)
   prepareLayout();
   // Dropdown Datensets erstellen
   dropdown = createSelect();
   dropdown.position(layoutBorder, 10);
+
   let rows = Object.values(rawData);
+  //maximales Gewicht der Importances Scores im aktuellen Datensatz auf Kategorie bezogen
+  let cat1Max = Math.max(...rows.map(r => r["Imp-Cat1"]));
+  let cat2Max = Math.max(...rows.map(r => r["Imp-Cat2"]));
+  currentMax = Math.max(cat1Max, cat2Max);
 
   // Alle Locations extrahieren ["blagajLT", "blagajLT", "blagajP", "blagajP", "zalikLT", ...]
   // Ein Set ist in JavaScript eine Datenstruktur, die nur eindeutige Werte speichert
@@ -60,18 +72,6 @@ function setup() {
   });
 
 
-  //Dropdown soziale Gruppen
-  groupdropdown = createSelect();
-  groupdropdown.position(layoutBorder + 200, 10);
-  Object.keys(groups).forEach(key => {
-    groupdropdown.option(groups[key]);
-  });
-  groupdropdown.selected(currentGroup);
-  groupdropdown.changed(() => {
-    currentGroup = groupdropdown.value();
-    //console.log(currentGroup)
-    
-  });
 
 
   colorMin = color(0, 100, 255, 200);
@@ -99,6 +99,7 @@ function draw() {
   noStroke();
   textAlign(CENTER, BOTTOM);
   textSize(12);
+
   for (let d = 0; d < dimensions.length; d++) {
     text(dimensions[d], beschriftungBreite + d * cellW + cellW / 2, 0);
   }
@@ -107,42 +108,52 @@ function draw() {
   pop();
 
   drawInfoBox();
+
+  //noLoop()
 }
 
-/**
- * Gibt die Maximum Importance Scores des aktuellen Sets – gefiltert nach Locatoin und sozialer Gruppe – zurück.
- * Filtert direkt aus rawData.
- *
- * @return {Array<Object>} Array von Indikatoren
- */
-function getCurrentIndicators() {
-  let rows = Object.values(rawData).filter(r => r.Community === currentDataset);
 
-  // maximale Werte für aktuelle Gruppe berechnen
-  currentMax = 0;
-  rows.forEach(r => {
-    let val = groupValue(r, currentGroup);
-     if (val > currentMax) currentMax = val;
-  });
 
-  return rows;
-}
 
 /**
- * Holt den Importance Score einer sozialen Gruppe aus einem Indikator.
+ * Berechnet den Importance-Wert für eine Dimension, basierend auf den beiden Kategorien eines Indikators.
+ * Nutzt Imp_Cat1 und Imp_Cat2, wenn vorhanden.
  *
- * @param {Object} row - Ein Datensatz/Indikator
- * @param {string} group - "male" | "female" | "youth" | "total"
- * @return {number} Stimmenanzahl
+ * @param {Object} row - Eine Zeile aus dem Datensatz (enthält Code_1, Code_2, Imp_Cat1, Imp_Cat2 usw.)
+ * @param {Objekt} Dimensionen
+ * @return {Object} Objekt mit Dimension(en) und deren Importance Score
  */
-function groupValue(row, group) {
-  switch (group) {
-    case "male": return float(row["Imp-M"]) || 0;
-    case "female": return float(row["Imp-F"]) || 0;
-    case "youth": return float(row["Imp-Y"]) || 0;
-    default: return float(row["Imp score"]) || 0;
+function scores(row, dimensions) {
+  // Rohwerte für Kategorien holen
+  const val1 = float(row["Imp-Cat1"]) || 0;
+  const val2 = float(row["Imp-Cat2"]) || 0;
+
+
+
+  // Dimensionen bestimmen
+  const d1 = findDimensionForCode(row.Code_1);
+  const d2 = findDimensionForCode(row.Code_2);
+  //console.log("from groupValue"+ d1, d2)
+
+  if (dimensions.d1 && dimensions.d2) {
+    if (dimensions.d1.localeCompare(dimensions.d2) == 0) {
+      // beide Kategorien gehören zur gleichen Dimension
+      const avg = (val1 + val2) / 2 || 0; // fallback: wenn Cat-Werte fehlen, nimm Indicator-Wert
+      return { "d1": avg, "d2": avg };
+    } else {
+      // zwei verschiedene Dimensionen → jeder bekommt seinen Cat-Wert
+      return { "d1": val1, "d2": val2 };
+    }
   }
+
+  // Fallback: falls nur eine Dimension gefunden wird
+  if (d1) return { "d1": val1 || 0 };
+  if (d2) return { "d2": val2 || 0 };
+
+  // wenn gar nichts passt, gib den Indicator-Wert zurück
+  return { "unknown": 0 };
 }
+
 
 /**
  * Berechnet die Layout-Parameter für Heatmap-Zellen.
@@ -150,9 +161,8 @@ function groupValue(row, group) {
  * @return {void}
  */
 function prepareLayout() {
-
+  let rows = Object.values(rawData).filter(r => r.Community === currentDataset);
   cellW = (width - 2 * layoutBorder - beschriftungBreite) / dimensions.length;
-  let rows = getCurrentIndicators();
   cellH = (height - 2 * layoutBorder) / rows.length;
 
 }
@@ -168,48 +178,65 @@ function prepareLayout() {
  */
 function drawHeatmap() {
   hoveredIndicator = null;
-  let rows = getCurrentIndicators();
-  //console.log(rows)
+  let rows = Object.values(rawData).filter(r => r.Community === currentDataset);
+  currentMax = 3;//fix gesetzt
   // Heatmap zeichnen
   for (let i = 0; i < rows.length; i++) {
     let row = rows[i];
     let name = row["Indicator English"];
-    let d1 = dimensions.indexOf(row["Dimension 1"]);
-    let d2 = dimensions.indexOf(row["Dimension 2"]);
-    let val = groupValue(row, currentGroup);
+    let d1 = findDimensionForCode(row.Code_1);
 
-   if (val > 0) {
-      // Label für Indikator
-      textAlign(RIGHT, CENTER);
-      textSize(10);
-      fill(0);
-      text(name.substring(0, 30) + " ... ", beschriftungBreite, i * cellH + cellH / 2);
+    let d2 = findDimensionForCode(row.Code_2);
+    //console.log(d1,d2)
+    //d1=String(row["Dimension 1"]).trim();
+    //d2=String(row["Dimension 2"]).trim();
+    let Impscores = scores(row, { "d1": d1, "d2": d2 });
 
-      // Alle Spalten
-      for (let d = 0; d < dimensions.length; d++) {
-        if ([d1, d2].includes(d)) {
-          noStroke();
-          if (mouseX > beschriftungBreite + layoutBorder + d * cellW &&
-            mouseX < beschriftungBreite + layoutBorder + (d + 1) * cellW &&
-            mouseY > layoutBorder + i * cellH &&
-            mouseY < layoutBorder + (i + 1) * cellH) {
-            hoveredIndicator = { row, val };
-            fill(0, 220);
-          } else {
-            let l = map(val, 0, currentMax, 0, 1);
-            let c = lerpColor(colorMin, colorMax, l);
-            fill(c);
-          }
-          rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
-        } else {
-          noFill();
-          stroke(230);
-          rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
+
+    // Label für Indikator
+    textAlign(RIGHT, CENTER);
+    textSize(10);
+    fill(0);
+    text(name.substring(0, 30) + " ... ", beschriftungBreite, i * cellH + cellH / 2);
+
+    // Alle Spalten
+    for (let d = 0; d < dimensions.length; d++) {
+      if ([d1, d2].includes(dimensions[d])) {
+        let val = 0;
+        if (d1 !== null && d1 == dimensions[d]) {
+          val = Impscores.d1;
+
         }
+        if (d2 !== null && d2 == dimensions[d]) {
+          val = Impscores.d2;
+
+        }
+
+        noStroke();
+        if (mouseX > beschriftungBreite + layoutBorder + d * cellW &&
+          mouseX < beschriftungBreite + layoutBorder + (d + 1) * cellW &&
+          mouseY > layoutBorder + i * cellH &&
+          mouseY < layoutBorder + (i + 1) * cellH) {
+          hoveredIndicator = { row, val };
+          fill(0, 220);
+        } else {
+          let l = map(val, 0, currentMax, 0, 1);
+          let c = lerpColor(colorMin, colorMax, l);
+          fill(c);
+        }
+        rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
+        fill(0)
+        textAlign(LEFT, BOTTOM);
+        text(val, beschriftungBreite + d * cellW, i * cellH + cellH)
+      } else {
+        noFill();
+        stroke(230);
+        rect(beschriftungBreite + d * cellW, i * cellH, cellW, cellH);
       }
     }
- }
+  }
 }
+
 
 /**
  * Zeichnet eine Infobox mit Detailinfos über dem aktuell gehoverten Indikator.
@@ -232,9 +259,9 @@ function drawInfoBox() {
     translate(0, 5);
     text(ind["Indicator English"], mouseX + 15, mouseY, 250);
     text("Male: " + (int(ind.M) || 0) + " – Importance Sc. Male " + float(ind["Imp-M"]), mouseX + 15, mouseY + lines * 15);
-    text("Female: " + (int(ind.F) || 0)+ " – Importance Sc. Female " + float(ind["Imp-F"]), mouseX + 15, mouseY + (lines + 1) * 15);
-    text("Youth: " + (int(ind.Y) || 0)+ " – Importance Sc. Youth " + float(ind["Imp-Y"]), mouseX + 15, mouseY + (lines + 2) * 15);
-    text("Total: " + (int(ind.T) || 0)+ " – Importance Sc. " + float(ind["Imp score"]), mouseX + 15, mouseY + + (lines + 3) * 15);
+    text("Female: " + (int(ind.F) || 0) + " – Importance Sc. Female " + float(ind["Imp-F"]), mouseX + 15, mouseY + (lines + 1) * 15);
+    text("Youth: " + (int(ind.Y) || 0) + " – Importance Sc. Youth " + float(ind["Imp-Y"]), mouseX + 15, mouseY + (lines + 2) * 15);
+    text("Total: " + (int(ind.T) || 0) + " – Importance Sc. " + float(ind["Imp score"]), mouseX + 15, mouseY + + (lines + 3) * 15);
     pop();
   }
 }
@@ -264,4 +291,54 @@ function countLines(txt, maxWidth) {
     }
   }
   return lines;
+}
+
+/**
+ * Hilfsfunktion: findet Dimension aus Code_1, bzw. Code_2
+ * um Schreibvarianten zu vermeiden wird die Info aus dem tree_combined.json gelesen
+ *
+ * @param {number}  1.2, 22.1 usw.
+ * @return {string} Bezeichnung Dimension
+ */
+function findDimensionForCode(num) {
+  for (const [dimensionName, categories] of Object.entries(codesHierarchy)) {
+
+    for (const cat of categories) {
+
+      if (float(normalizeNum(cat.Num)) === float(normalizeNum(num))) {
+        return dimensionName; // Kategorie selbst passt
+      }
+      if (cat.children) {
+        if (findInChildren(num, cat.children)) {
+          return dimensionName; // irgendein Child passt → Dimension zurück
+        }
+      }
+    }
+  }
+  return null;
+}
+/**
+ * Normalisiert eine Code-Nummer wie " 1.5 ", "1,5" oder "\uFEFF1.5"
+ * -> "1.5"
+ */
+function normalizeNum(x) {
+  if (x === null || x === undefined) return null;
+  // in String, trim, BOM entfernen, Komma->Punkt ersetzen
+  return String(x)
+    .replace(/\uFEFF/g, '')   // BOM entfernen
+    .replace(/\u00A0/g, ' ')  // NBSP -> regular space
+    .trim()
+    .replace(',', '.');       // falls Dezimalkomma vorkommen
+}
+
+function findInChildren(num, children) {
+  for (const child of children) {
+    if (float(normalizeNum(child.Num)) === float(normalizeNum(num))) {
+      return true;
+    }
+    if (child.children && findInChildren(num, child.children)) {
+      return true;
+    }
+  }
+  return false;
 }
