@@ -35,7 +35,7 @@ let dataObjects = [];
 // Funktion die vor setup() ausgeführt wird - lädt Daten und ML-Modell
 function preload() {
   // Lade JSON-Datei mit allen Daten
-  data = loadD3JSON("data/mostar-combined.json");
+  data = loadD3JSON("data/combined-data.json");
 
   // Initialisiere das Sentiment-Analyse-Modell
   sentiment = ml5.sentiment("MovieReviews");
@@ -74,12 +74,35 @@ function draw() {
     rect(object.pX, object.pY, rectWidth, rectHeight);
   }
 
-  // Zeichne auch Objekte direkt aus den Daten
-  for (let object of data) {
-    let conf = object.confidence || 0;
-    let mappedColor = lerpColor(redColor, greenColor, conf);
-    fill(mappedColor);
-    rect(object.pX, object.pY, rectWidth, rectHeight);
+  // // Zeichne auch Objekte direkt aus den Daten
+  // for (let object of data) {
+  //   let conf = object.confidence || 0;
+  //   let mappedColor = lerpColor(redColor, greenColor, conf);
+  //   fill(mappedColor);
+  //   rect(object.pX, object.pY, rectWidth, rectHeight);
+  // }
+
+  if (dataObjects.length > 0) {
+    console.log(dataObjects[0]);
+    let sortedDataObjects = sortData(dataObjects);
+    console.log("Sortierte Daten:", sortedDataObjects);
+
+    let pX = padding;
+    let pY = posY + rectHeight + spacing;
+    for (let object of sortedDataObjects) {
+      // Mische Farbe basierend auf Sentiment-Konfidenz
+      let mappedColor = lerpColor(redColor, greenColor, object.confidence);
+
+      fill(mappedColor);
+      rect(pX, pY, rectWidth, rectHeight);
+      pX += rectWidth + spacing;
+
+      if (pX > width - padding - rectWidth) {
+        pX = padding; // Zurück zum linken Rand
+        pY += rectHeight + spacing; // Eine Zeile nach unten
+      }
+    }
+    noLoop(); // Stoppe draw() wenn alle Objekte gezeichnet sind
   }
 }
 
@@ -88,28 +111,11 @@ function sortData(inputData) {
   // Erstelle Kopie des Arrays und sortiere sie
   return [...inputData].sort((a, b) => {
     // Extrahiere Vergleichswerte (mit Fallback auf leeren String)
-    let locationA = a["Community"] || "";
-    let locationB = b["Community"] || "";
-    let dimensionA = a["Dimension 1"] || "";
-    let dimensionB = b["Dimension 1"] || "";
-    let subdimensionA = a["Subcat 1 name"] || "";
-    let subdimensionB = b["Subcat 1 name"] || "";
+    let confidenceA = a["confidence"] || "";
+    let confidenceB = b["confidence"] || "";
 
-    // Vergleiche die Werte alphabetisch
-    let locationComparison = locationA.localeCompare(locationB);
-    let dimComparison = dimensionA.localeCompare(dimensionB);
-    let subdimComparison = subdimensionA.localeCompare(subdimensionB);
-
-    // Sortierreihenfolge: Erst Location, dann Dimension, dann Subdimension
-    if (locationComparison === 0) {
-      // Gleiche Location?
-      if (dimComparison === 0) {
-        // Gleiche Dimension?
-        return subdimComparison; // Sortiere nach Subdimension
-      }
-      return dimComparison; // Sortiere nach Dimension
-    }
-    return locationComparison; // Sortiere nach Location
+    // Vergleiche die Werte
+    return confidenceB - confidenceA;
   });
 }
 
@@ -120,7 +126,7 @@ function getUniqueValues(data, property) {
 
 // Funktion um Informationen über die Daten in der Konsole auszugeben
 function logDataInfo() {
-  let uniqueLocations = getUniqueValues(data, "location");
+  let uniqueLocations = getUniqueValues(data, "Community");
   let uniqueConcepts = getUniqueValues(data, "Concept");
   let uniqueDimensions = getUniqueValues(data, "Dimension 1");
 
@@ -154,6 +160,7 @@ function gotResult(prediction, textId, originalText, originalItem) {
     confidence: prediction.confidence,
     pX: posX, // X-Position
     pY: posY, // Y-Position
+    text: originalText,
   };
 
   // Bewege Position für nächstes Rechteck
