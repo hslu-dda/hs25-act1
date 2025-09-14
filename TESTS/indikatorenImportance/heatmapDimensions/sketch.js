@@ -30,7 +30,7 @@ let codesHierarchy;
 function preload() {
 
   //loadJSON gibt ein Objekt zurück
-  rawData = loadJSON("../data/_combined-data.json");
+  rawData = loadJSON("../data/combined-data.json");
   codesHierarchy = loadJSON("../data/tree_combined.json")
 }
 
@@ -139,16 +139,16 @@ function scores(row, dimensions) {
     if (dimensions.d1.localeCompare(dimensions.d2) == 0) {
       // beide Kategorien gehören zur gleichen Dimension
       const avg = (val1 + val2) / 2 || 0; // fallback: wenn Cat-Werte fehlen, nimm Indicator-Wert
-      return { "d1": avg, "d2": avg };
+      return { "d1": avg.toFixed(2), "d2": avg.toFixed(2) };
     } else {
       // zwei verschiedene Dimensionen → jeder bekommt seinen Cat-Wert
-      return { "d1": val1, "d2": val2 };
+      return { "d1": val1.toFixed(2), "d2": val2.toFixed(2) };
     }
   }
 
   // Fallback: falls nur eine Dimension gefunden wird
-  if (d1) return { "d1": val1 || 0 };
-  if (d2) return { "d2": val2 || 0 };
+  if (d1) return { "d1": val1.toFixed(2) || 0 };
+  if (d2) return { "d2": val2.toFixed(2) || 0 };
 
   // wenn gar nichts passt, gib den Indicator-Wert zurück
   return { "unknown": 0 };

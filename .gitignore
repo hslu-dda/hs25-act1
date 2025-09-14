@@ -1,8 +1,4 @@
 .DS_Store
 .vscode
 ./*/node_modules
-# Data folders at any depth
-data/
-**/data/
-/data/
 

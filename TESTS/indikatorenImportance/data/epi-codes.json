@@ -1,0 +1,614 @@
+[
+  {
+    "Num": "1",
+    "CODE": "Integration and Acceptance",
+    "children": [
+      {
+        "Num": "1.1",
+        "CODE": "Personal value"
+      },
+      {
+        "Num": "1.2",
+        "CODE": "Political"
+      },
+      {
+        "Num": "1.3",
+        "CODE": "Social"
+      }
+    ]
+  },
+  {
+    "Num": "2",
+    "CODE": "Tranquility/Security",
+    "children": [
+      {
+        "Num": "2.1",
+        "CODE": "Sense of safety"
+      },
+      {
+        "Num": "2.2",
+        "CODE": "Confidence"
+      },
+      {
+        "Num": "2.3",
+        "CODE": "Movement"
+      }
+    ]
+  },
+  {
+    "Num": "3",
+    "CODE": "Public space",
+    "children": [
+      {
+        "Num": "3.1",
+        "CODE": "Open spaces"
+      },
+      {
+        "Num": "3.2",
+        "CODE": "Holidays"
+      },
+      {
+        "Num": "3.3",
+        "CODE": "Comfort"
+      },
+      {
+        "Num": "3.4",
+        "CODE": "Integration"
+      },
+      {
+        "Num": "3.5",
+        "CODE": "Use of outdoors"
+      },
+      {
+        "Num": "3.6",
+        "CODE": "Stari Most"
+      },
+      {
+        "Num": "3.7",
+        "CODE": "Activities"
+      },
+      {
+        "Num": "3.8",
+        "CODE": "Historic cultural monuments"
+      },
+      {
+        "Num": "3.9",
+        "CODE": "Public Ownership"
+      }
+    ]
+  },
+  {
+    "Num": "4",
+    "CODE": "Criminality and Legal Enforcement",
+    "children": [
+      {
+        "Num": "4.1",
+        "CODE": "Sport & Hooliganism"
+      },
+      {
+        "Num": "4.2",
+        "CODE": "Corruption"
+      },
+      {
+        "Num": "4.3",
+        "CODE": "Non-violent Crime"
+      },
+      {
+        "Num": "4.4",
+        "CODE": "Violent Crime"
+      }
+    ]
+  },
+  {
+    "Num": "5",
+    "CODE": "Police",
+    "children": [
+      {
+        "Num": "5.1",
+        "CODE": "Accountability"
+      },
+      {
+        "Num": "5.2",
+        "CODE": "Integration"
+      },
+      {
+        "Num": "5.3",
+        "CODE": "Interactions"
+      }
+    ]
+  },
+  {
+    "Num": "6",
+    "CODE": "Social Relations",
+    "children": [
+      {
+        "Num": "6.1",
+        "CODE": "Us V Them"
+      },
+      {
+        "Num": "6.2",
+        "CODE": "Personal Relationships"
+      },
+      {
+        "Num": "6.3",
+        "CODE": "Social Trust"
+      },
+      {
+        "Num": "6.4",
+        "CODE": "Activism"
+      },
+      {
+        "Num": "6.5",
+        "CODE": "Technology"
+      },
+      {
+        "Num": "6.6",
+        "CODE": "Inter-generational Relations"
+      },
+      {
+        "Num": "6.7",
+        "CODE": "Immigration"
+      },
+      {
+        "Num": "6.8",
+        "CODE": "Language"
+      },
+      {
+        "Num": "6.9",
+        "CODE": "Ethno-religious identity"
+      },
+      {
+        "Num": "6.1",
+        "CODE": "Social Support"
+      },
+      {
+        "Num": "6.11",
+        "CODE": "Cooperation & Coexistence"
+      },
+      {
+        "Num": "6.12",
+        "CODE": "Neighbor Relations"
+      }
+    ]
+  },
+  {
+    "Num": "7",
+    "CODE": "Legacies of War",
+    "children": [
+      {
+        "Num": "7.1",
+        "CODE": "Memorialization"
+      },
+      {
+        "Num": "7.2",
+        "CODE": "Common justice"
+      },
+      {
+        "Num": "7.3",
+        "CODE": "Education"
+      },
+      {
+        "Num": "7.4",
+        "CODE": "Clarification"
+      },
+      {
+        "Num": "7.5",
+        "CODE": "Forgiveness"
+      },
+      {
+        "Num": "7.6",
+        "CODE": "Intergroup"
+      },
+      {
+        "Num": "7.7",
+        "CODE": "Infrastructure"
+      },
+      {
+        "Num": "7.8",
+        "CODE": "Returns"
+      }
+    ]
+  },
+  {
+    "Num": "8",
+    "CODE": "Nationalism",
+    "children": [
+      {
+        "Num": "8.1",
+        "CODE": "Effect"
+      },
+      {
+        "Num": "8.2",
+        "CODE": "Punishment"
+      },
+      {
+        "Num": "8.3",
+        "CODE": "Sport"
+      },
+      {
+        "Num": "8.4",
+        "CODE": "Politics"
+      },
+      {
+        "Num": "8.5",
+        "CODE": "Political Symbols"
+      }
+    ]
+  },
+  {
+    "Num": "9",
+    "CODE": "Governance",
+    "children": [
+      {
+        "Num": "9.1",
+        "CODE": "City politics"
+      },
+      {
+        "Num": "9.2",
+        "CODE": "Political accountability"
+      },
+      {
+        "Num": "9.3",
+        "CODE": "Political functionality"
+      },
+      {
+        "Num": "9.4",
+        "CODE": "Accessibility"
+      },
+      {
+        "Num": "9.5",
+        "CODE": "Political coexistence"
+      },
+      {
+        "Num": "9.6",
+        "CODE": "Mjesna zajednica"
+      },
+      {
+        "Num": "9.7",
+        "CODE": "Citizens' associations"
+      },
+      {
+        "Num": "9.8",
+        "CODE": "Access to public funds"
+      },
+      {
+        "Num": "9.9",
+        "CODE": "Political parties"
+      }
+    ]
+  },
+  {
+    "Num": "10",
+    "CODE": "Social Programs / Social Services",
+    "children": [
+      {
+        "Num": "10.1",
+        "CODE": "Pensions"
+      },
+      {
+        "Num": "10.2",
+        "CODE": "Drug rehab"
+      },
+      {
+        "Num": "10.3",
+        "CODE": "Housing"
+      },
+      {
+        "Num": "10.4",
+        "CODE": "Public information"
+      },
+      {
+        "Num": "10.5",
+        "CODE": "Disability Accommodations"
+      },
+      {
+        "Num": "10.6",
+        "CODE": "Public utilities"
+      },
+      {
+        "Num": "10.7",
+        "CODE": "Animals"
+      },
+      {
+        "Num": "10.8",
+        "CODE": "Medical"
+      },
+      {
+        "Num": "10.9",
+        "CODE": "Unemployment"
+      }
+    ]
+  },
+  {
+    "Num": "11",
+    "CODE": "Socializing",
+    "children": [
+      {
+        "Num": "11.1",
+        "CODE": "Cafes and Space"
+      },
+      {
+        "Num": "11.2",
+        "CODE": "Social"
+      },
+      {
+        "Num": "11.3",
+        "CODE": "Leisure"
+      },
+      {
+        "Num": "11.4",
+        "CODE": "Informal"
+      }
+    ]
+  },
+  {
+    "Num": "12",
+    "CODE": "Sport",
+    "children": [
+      {
+        "Num": "12.1",
+        "CODE": "Access to facilities"
+      },
+      {
+        "Num": "12.2",
+        "CODE": "Public support for sports"
+      },
+      {
+        "Num": "12.3",
+        "CODE": "Activities"
+      },
+      {
+        "Num": "12.4",
+        "CODE": "Inclusion"
+      }
+    ]
+  },
+  {
+    "Num": "13",
+    "CODE": "Media",
+    "children": [
+      {
+        "Num": "13.1",
+        "CODE": "Traditional"
+      },
+      {
+        "Num": "13.2",
+        "CODE": "Online"
+      }
+    ]
+  },
+  {
+    "Num": "14",
+    "CODE": "Religion",
+    "children": [
+      {
+        "Num": "14.1",
+        "CODE": "Religious education"
+      },
+      {
+        "Num": "14.2",
+        "CODE": "Interfaith relations"
+      },
+      {
+        "Num": "14.3",
+        "CODE": "Religious beliefs and practices"
+      },
+      {
+        "Num": "14.4",
+        "CODE": "Religious buildings"
+      }
+    ]
+  },
+  {
+    "Num": "15",
+    "CODE": "Youth",
+    "children": [
+      {
+        "Num": "15.1",
+        "CODE": "Engagement"
+      },
+      {
+        "Num": "15.2",
+        "CODE": "Infrastructure"
+      },
+      {
+        "Num": "15.3",
+        "CODE": "Health"
+      },
+      {
+        "Num": "15.4",
+        "CODE": "Livelihoods"
+      },
+      {
+        "Num": "15.5",
+        "CODE": "Inclusion"
+      },
+      {
+        "Num": "15.6",
+        "CODE": "Parenting"
+      }
+    ]
+  },
+  {
+    "Num": "16",
+    "CODE": "Drugs & Alcohol",
+    "children": [
+      {
+        "Num": "16.1",
+        "CODE": "Prevention"
+      },
+      {
+        "Num": "16.2",
+        "CODE": "policing"
+      },
+      {
+        "Num": "16.3",
+        "CODE": "rehabilitation"
+      },
+      {
+        "Num": "16.4",
+        "CODE": "Usage"
+      }
+    ]
+  },
+  {
+    "Num": "17",
+    "CODE": "Infrastructure",
+    "children": [
+      {
+        "Num": "17.1",
+        "CODE": "Roads"
+      },
+      {
+        "Num": "17.2",
+        "CODE": "Public Space"
+      },
+      {
+        "Num": "17.3",
+        "CODE": "Public Lighting"
+      },
+      {
+        "Num": "17.4",
+        "CODE": "Buildings"
+      },
+      {
+        "Num": "17.5",
+        "CODE": "Property Ownership (Land)"
+      }
+    ]
+  },
+  {
+    "Num": "18",
+    "CODE": "Environment",
+    "children": [
+      {
+        "Num": "18.1",
+        "CODE": "Waste management services"
+      },
+      {
+        "Num": "18.2",
+        "CODE": "Waste prevention"
+      },
+      {
+        "Num": "18.3",
+        "CODE": "Environmental Restoration"
+      }
+    ]
+  },
+  {
+    "Num": "19",
+    "CODE": "Education",
+    "children": [
+      {
+        "Num": "19.1",
+        "CODE": "Vocational Schools"
+      },
+      {
+        "Num": "19.2",
+        "CODE": "Non school based education"
+      },
+      {
+        "Num": "19.3",
+        "CODE": "School inclusiveness"
+      },
+      {
+        "Num": "19.4",
+        "CODE": "Student activities"
+      },
+      {
+        "Num": "19.5",
+        "CODE": "Family-based education"
+      },
+      {
+        "Num": "19.6",
+        "CODE": "School behavior"
+      }
+    ]
+  },
+  {
+    "Num": "20",
+    "CODE": "Business",
+    "children": [
+      {
+        "Num": "20.1",
+        "CODE": "Inclusivity"
+      },
+      {
+        "Num": "20.2",
+        "CODE": "Hiring & Employment"
+      },
+      {
+        "Num": "20.3",
+        "CODE": "Workers protection and rights"
+      },
+      {
+        "Num": "20.4",
+        "CODE": "Ownership"
+      },
+      {
+        "Num": "20.5",
+        "CODE": "Youth employment"
+      },
+      {
+        "Num": "20.6",
+        "CODE": "Small businesses"
+      },
+      {
+        "Num": "20.7",
+        "CODE": "Truthfulness & Saftey"
+      },
+      {
+        "Num": "20.8",
+        "CODE": "Livelihoods"
+      },
+      {
+        "Num": "20.9",
+        "CODE": "Tourism"
+      }
+    ]
+  },
+  {
+    "Num": "21",
+    "CODE": "Motor Vehicles",
+    "children": [
+      {
+        "Num": "21.1",
+        "CODE": "Parking"
+      },
+      {
+        "Num": "21.2",
+        "CODE": "Traffic"
+      },
+      {
+        "Num": "21.3",
+        "CODE": "Pedestrian Saftey"
+      },
+      {
+        "Num": "21.4",
+        "CODE": "Public Transport"
+      }
+    ]
+  },
+  {
+    "Num": "22",
+    "CODE": "Gender",
+    "children": [
+      {
+        "Num": "22.1",
+        "CODE": "Gender norms"
+      },
+      {
+        "Num": "22.2",
+        "CODE": "Gender based violence"
+      },
+      {
+        "Num": "22.3",
+        "CODE": "Safety and comfort"
+      },
+      {
+        "Num": "22.4",
+        "CODE": "Gender based activites"
+      }
+    ]
+  }
+]
