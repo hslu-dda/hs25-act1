@@ -44,8 +44,7 @@ function preload() {
 // Hauptinitialisierung - wird einmal am Anfang ausgeführt
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  background(100); // Dunkelgrauer Hintergrund
-
+  background(255); // Dunkelgrauer Hintergrund
   console.log("Daten geladen:", data);
 
   // Zeige Informationen über die Daten an
@@ -73,14 +72,6 @@ function draw() {
     fill(mappedColor);
     rect(object.pX, object.pY, rectWidth, rectHeight);
   }
-
-  // // Zeichne auch Objekte direkt aus den Daten
-  // for (let object of data) {
-  //   let conf = object.confidence || 0;
-  //   let mappedColor = lerpColor(redColor, greenColor, conf);
-  //   fill(mappedColor);
-  //   rect(object.pX, object.pY, rectWidth, rectHeight);
-  // }
 
   if (dataObjects.length > 0) {
     console.log(dataObjects[0]);
