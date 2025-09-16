@@ -130,8 +130,8 @@ function drawTable() {
 
   textAlign(LEFT, TOP);
 
-   let rows = Object.values(rawData);
-   //Filter nach Locations 
+  let rows = Object.values(rawData);
+  //Filter nach Locations 
   let filtered;
   if (currentDataset !== "All") {
     filtered = rows.filter(function (r) {
@@ -141,14 +141,14 @@ function drawTable() {
     filtered = rows;
   }
 
- 
+
   const max = Math.max(...filtered.map(r => r["Imp score"] || 0));
   //console.log("Max Importance Score: " + max);
 
   // Minimum Importance Score
   const min = Math.min(...filtered.map(r => r["Imp score"] || Infinity));
 
- 
+
 
   let cellHeight = (height - 2 * border - 48) / rows.length;
 
