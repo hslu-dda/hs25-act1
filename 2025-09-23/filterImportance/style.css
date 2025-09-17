@@ -1,0 +1,52 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  display: block;
+}
+
+
+#infofenster {
+  /* Position */
+  position: absolute;
+  z-index:100;
+
+  /* Abstände und Rahmen */
+  border: 1px solid #ccc; /* Ein dünner grauer Rahmen */
+  padding: 20px; /* Innenabstand */
+  margin-bottom: 20px; /* Außenabstand nach unten */
+  width: 300px;
+
+  /* Hintergrund und Schatten */
+  background-color: #f9f9f9; /* heller grauer Hintergrund */
+  border-radius: 8px; /* Abgerundete Ecken */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* dezenter Schatten */
+
+  /* Typografie */
+  font-family: sans-serif; /* Eine einfache Schriftart */
+  color: #333; /* Dunkelgraue Textfarbe */
+  
+
+  /* Sichtbarkeit */
+  opacity: 0;
+
+  /* Animation der Eigenschaften */
+  transition: opacity 0.5s linear;
+}
+
+#infofenster.visible{
+  opacity: 1;
+}
+
+#infofenster h2 {
+  color: #007bff; /* Eine auffälligere Farbe für den Titel */
+  margin-top: 0; /* Kein oberer Rand für den Titel */
+  margin-bottom: 10px; /* Kleiner Abstand zum Text */
+  font-weight: normal;
+}
+
+#infofenster p {
+  line-height: 1.6; /* Bessere Lesbarkeit durch Zeilenabstand */
+}

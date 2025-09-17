@@ -21,7 +21,7 @@ let layoutBorder = 50;
 let cellW, cellH;
 let beschriftungBreite = 180;
 
-let codesHierarchy;
+
 
 /**
  * Lädt alle Datensets aus einem JSON
@@ -31,7 +31,7 @@ function preload() {
 
   //loadJSON gibt ein Objekt zurück
   rawData = loadJSON("../data/mostar-augmented.json");
-  codesHierarchy = loadJSON("../data/tree_combined.json")
+ 
 }
 
 /**
@@ -41,12 +41,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight * 2);
   //console.log(codesHierarchy)
   //Dimensionen 
-  for (let key of Object.entries(codesHierarchy)) {
-    dimensions.add(key[0]);
-
-  }
-
-  dimensions = [...dimensions];
+  let dim = Object.values(rawData).flatMap(r => [r.Dim1, r.Dim2])
+  dimensions = [...new Set(dim.filter(Boolean))];
 
   //console.log(dimensions)
   prepareLayout();
