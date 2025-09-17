@@ -21,7 +21,8 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  const cvn=createCanvas(windowWidth, windowHeight);
+  cvn.parent("sketch")
 
   let rows = Object.values(rawData).filter(r => r.Community === currentDataset);
   //maximales udn minimales Gewicht der Importances Scores im aktuellen Datensatz 
@@ -33,7 +34,7 @@ function setup() {
 
   //Slider kreieren 
   importanceSlider = createSlider(currentMin, currentMax, avg);
-  importanceSlider.position(border, border);
+  importanceSlider.parent("slider");
 
 }
 
@@ -83,6 +84,13 @@ function drawInfoFenster(indicator) {
     fenster.querySelector("h2").innerHTML = text;
 
     //Zugriff auf CSS Styles des Elements
+    if(indicator.center.x + 300 > width){
+      indicator.center.x = width - 300;
+    }
+    
+    if(indicator.center.y + fenster.clientHeight > height){
+      indicator.center.y = height - fenster.clientHeight;
+    }
     fenster.style.top = indicator.center.y + "px";
     fenster.style.left = indicator.center.x + "px";
     fenster.classList.add("visible");

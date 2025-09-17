@@ -7,6 +7,16 @@ canvas {
   display: block;
 }
 
+#sketch canvas{
+  border:1px solid blue;
+  width:100% !important;
+  height:auto !important;
+}
+
+#slider{
+  position: relative;
+  z-index:110;
+}
 
 #infofenster {
   /* Position */
