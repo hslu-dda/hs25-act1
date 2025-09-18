@@ -1,5 +1,6 @@
 // Globale Variable für die geladenen Daten
 let data = {};
+let dataP5Way;
 
 // Farben für verschiedene Dimensionen
 const dimensionColors = {
@@ -22,15 +23,23 @@ let textHeight = 12; // Höhe des Texts
 // Funktion die vor setup() ausgeführt wird - lädt die JSON-Datei
 function preload() {
   data = loadD3JSON("data/combined-data.json");
+
+  dataP5Way = loadJSON("data/combined-data.json");
+
   console.log("Daten werden geladen...");
 }
 
 // Hauptinitialisierung - wird einmal am Anfang ausgeführt
 function setup() {
+  console.log("setup");
+
   createCanvas(windowWidth, 2000);
   background(255); // Weißer Hintergrund
-
   console.log("Daten geladen:", data);
+  console.log("Daten geladen (p5 way):", dataP5Way);
+  var newArrayDataOfOjbect = Object.values(dataP5Way);
+
+  console.log("Daten als Array:", newArrayDataOfOjbect);
 
   // Sortiere Daten erst nach Community, dann nach Dimension, dann nach Subdimension
   let sortedData = sortData(data);

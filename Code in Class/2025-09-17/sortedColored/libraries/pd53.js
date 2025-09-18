@@ -117,12 +117,11 @@ p5.prototype.registerPromisePreload({
  * Synchronous-style wrapper for loading CSV data.
  * @function loadD3CSV
  * @param {string} path - The path to the CSV file.
- * @param {string} [delimiter=','] - The delimiter used in the CSV file.
  * @returns {Array} An array that will be populated with the CSV data.
  */
-p5.prototype.loadD3CSV = function (path, delimiter = ",") {
+p5.prototype.loadD3CSV = function (path) {
   let csv = [];
-  this.loadCSVAsync(path, delimiter).then((data) => {
+  this.loadCSVAsync(path).then((data) => {
     console.log("return from legacy", data);
     csv.push(...data);
   });
