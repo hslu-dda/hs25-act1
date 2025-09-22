@@ -22,6 +22,7 @@ function setup() {
   // ---------- Canvas im DOM platzieren
 
   let rows = Object.values(rawData).filter(r => r.Community === currentDataset);
+  
   //maximales und minimales Gewicht der Importances Scores im aktuellen Datensatz 
   currentMax = Math.max(...rows.map(r => float(r["Imp score"])));
   currentMin = Math.min(...rows.map(r => float(r["Imp score"])));

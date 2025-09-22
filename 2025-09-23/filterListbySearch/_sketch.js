@@ -8,7 +8,7 @@ let input;
 let cellHeight = 24;
 
 function preload() {
-  rawData = loadJSON("../data/mostar-augmented.json");
+  rawData = loadJSON("../../data/mostar-augmented.json");
 }
 
 function setup() {
