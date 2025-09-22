@@ -117,12 +117,11 @@ p5.prototype.registerPromisePreload({
  * Synchronous-style wrapper for loading CSV data.
  * @function loadD3CSV
  * @param {string} path - The path to the CSV file.
- * @param {string} [delimiter=','] - The delimiter used in the CSV file.
  * @returns {Array} An array that will be populated with the CSV data.
  */
-p5.prototype.loadD3CSV = function (path, delimiter = ",") {
+p5.prototype.loadD3CSV = function (path) {
   let csv = [];
-  this.loadCSVAsync(path, delimiter).then((data) => {
+  this.loadCSVAsync(path).then((data) => {
     console.log("return from legacy", data);
     csv.push(...data);
   });
@@ -202,6 +201,47 @@ p5.prototype.loadCSV = function (path, callback) {
       callback(ret);
     }
   });
+
+  return ret;
+};
+
+// Register the preload method for JSON loading
+p5.prototype.registerMethod("preload", p5.prototype.loadJSON);
+
+/**
+ * Loads JSON data using D3.
+ * @function loadJSON
+ * @param {string} path - The path to the JSON file.
+ * @param {Function} [callback] - Optional callback function to handle the loaded data.
+ * @returns {Array} An array that will be populated with the JSON data.
+ */
+p5.prototype.loadJSON = function (path, callback) {
+  const p5Instance = this;
+  const ret = [];
+
+  p5Instance._incrementPreload();
+
+  d3.json(path, d3.autoType)
+    .then((json) => {
+      if (Array.isArray(json)) {
+        ret.push(...json);
+      } else {
+        ret.push(json);
+      }
+      console.log("ret json from d3", ret);
+      if (typeof callback === "function") {
+        callback(null, ret);
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading JSON", error);
+      if (typeof callback === "function") {
+        callback(error, ret);
+      }
+    })
+    .finally(() => {
+      p5Instance._decrementPreload();
+    });
 
   return ret;
 };
