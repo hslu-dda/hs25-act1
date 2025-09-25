@@ -1,0 +1,43 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+canvas {
+  display: block;
+}
+
+#p5Wrapper {
+  flex: 2;
+  margin: 10px;
+  padding: 10px;
+  width: 50%;
+  overflow: scroll;
+  box-shadow: inset 0 0 10px #000000;
+}
+
+#panel {
+  flex: 1;
+  margin: 10px;
+  padding: 10px;
+  border: solid 1px #000000;
+}
+
+#panel input {
+  width: 100%;
+  box-sizing: border-box; /* so padding/border don't overflow */
+  padding: 8px;
+  font-size: 16px;
+}
+
+#panel p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
