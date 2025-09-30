@@ -3,3 +3,4 @@
 ./*/node_modules
 embeddings.json
 clustered.json
+.env
