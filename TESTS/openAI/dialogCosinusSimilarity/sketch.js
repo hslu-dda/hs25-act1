@@ -18,7 +18,7 @@ function setup() {
 
   data= Object.values(rawData);
   // Extrahiere Arrays
-  indicators = data.map(d => d["Indicator English"]);
+  indicators = data;
   embeddings = data.map(d => d.embedding);
 
   currentIndex = floor(random(indicators.length));
@@ -29,13 +29,15 @@ function setup() {
 function draw() {
   background(255);
 
-  text("Aktueller Indikator:", 20, 40);
-  text(indicators[currentIndex], 20, 70, width-40);
+  drawIndicators(currentIndex, "thisIndicator");
+  //text("Aktueller Indikator:", 20, 40);
+  //text(indicators[currentIndex]["Indicator English"], 20, 70, width-40);
 
-  text("Nächster Vorschlag:", 20, 140);
+  //text("Nächster Vorschlag:", 20, 140);
   let next = findNextClosest(currentIndex);
   if (next !== null) {
-    text(indicators[next], 20, 170, width-40);
+    drawIndicators(next, "nextIndicator");
+    //text(indicators[next]["Indicator English"], 20, 170, width-40);
   }
 }
 
@@ -72,4 +74,14 @@ function findNextClosest(index) {
     }
   }
   return bestIdx;
+}
+
+
+function drawIndicators(index, id) {
+ 
+  let indicator = document.getElementById(id);
+   //console.log(indicator)
+  indicator.querySelector("h2").textContent = indicators[index]["Indicator English"];
+  indicator.querySelector(".cluster").textContent = "KI generated Cluster Title: "+indicators[index]["clusterLabel"];
+  indicator.querySelector(".group").textContent = indicators[index]["Focus Group"];
 }
