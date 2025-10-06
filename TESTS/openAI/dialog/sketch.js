@@ -6,9 +6,11 @@ let indicators; // Texte
 let currentIndex = 0; // Start-Indikator
 let visited = [];
 
+let next = null; // nächster Indikator
+
 function preload() {
   // clustered.json: [{text: "Jobs ...", embedding: [0.01, ...]}, ...]
-  rawData = loadJSON("clustered.json"); 
+  rawData = loadJSON("clustered.json");
 }
 
 function setup() {
@@ -16,14 +18,16 @@ function setup() {
   textFont("Arial");
   textSize(16);
 
-  data= Object.values(rawData);
+  data = Object.values(rawData);
   // Extrahiere Arrays
   indicators = data;
   embeddings = data.map(d => d.embedding);
 
   currentIndex = floor(random(indicators.length));
-
   visited.push(currentIndex);
+
+  next = findNextClosest(currentIndex);
+  visited.push(next);
 }
 
 function draw() {
@@ -34,7 +38,7 @@ function draw() {
   //text(indicators[currentIndex]["Indicator English"], 20, 70, width-40);
 
   //text("Nächster Vorschlag:", 20, 140);
-  let next = findNextClosest(currentIndex);
+  //
   if (next !== null) {
     drawIndicators(next, "nextIndicator");
     //text(indicators[next]["Indicator English"], 20, 170, width-40);
@@ -76,12 +80,45 @@ function findNextClosest(index) {
   return bestIdx;
 }
 
+// Finde den am weitesten entfernten noch nicht besuchten Indikator
+function findNextFurthest(index) {
+  let worstSim = 1;
+  let worstIdx = null;
+  for (let i = 0; i < embeddings.length; i++) {
+    if (i === index || visited.includes(i)) continue;
+    let sim = cosineSim(embeddings[index], embeddings[i]);
+    if (sim < worstSim) {
+      worstSim = sim;
+      worstIdx = i;
+    }
+  }
+  return worstIdx;
+}
 
 function drawIndicators(index, id) {
- 
+
   let indicator = document.getElementById(id);
-   //console.log(indicator)
+  //console.log(indicator)
   indicator.querySelector("h2").textContent = indicators[index]["Indicator English"];
-  indicator.querySelector(".cluster").textContent = "KI generated Cluster Title: "+indicators[index]["clusterLabel"];
+  indicator.querySelector(".cluster").textContent = "KI generated Cluster Title: " + indicators[index]["clusterLabel"];
   indicator.querySelector(".group").textContent = indicators[index]["Focus Group"];
+  indicator.querySelector(".community").textContent = indicators[index]["Community"];
 }
+
+document.getElementById("closestIndicator").addEventListener("click", () => {
+  currentIndex = next;
+  next = findNextClosest(currentIndex);
+  if (next !== null) {
+  visited.push(next);
+  }
+
+});
+
+document.getElementById("oppositeIndicator").addEventListener("click", () => {
+  currentIndex = next;
+  next = findNextFurthest(currentIndex);
+  if (next !== null) {
+    visited.push(next);
+  }
+});
+
