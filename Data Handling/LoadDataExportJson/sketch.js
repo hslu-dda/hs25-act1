@@ -5,14 +5,20 @@ let sortedDataArray; // Array für sortierte Daten
 
 // Dateipfade für CSV-Dateien
 const files = {
-  blagajLT: "data/blagajLT.csv",
-  blagajP: "data/blagajP.csv",
-  bulivarCernicaLT: "data/bulivarCernicaLT.csv",
-  bulivarCernicaP: "data/bulivarCernicaP.csv",
-  podhumLT: "data/podhumLT.csv",
-  podhumP: "data/podhumP.csv",
-  zalikLT: "data/zalikLT.csv",
-  zalikP: "data/zalikP.csv",
+  bijeliBrijegLT: "singleCSV/Bijeli_Brijeg_LT.csv",
+  bijeliBrijegP: "singleCSV/Bijeli_Brijeg_P.csv",
+  blagajLT: "singleCSV/Blagaj_LT.csv",
+  blagajP: "singleCSV/Blagaj_P.csv",
+  cernicaLT: "singleCSV/Cernica_LT.csv",
+  cernicaP: "singleCSV/Cernica_P.csv",
+  cimLT: "singleCSV/Cim_LT.csv",
+  cimP: "singleCSV/Cim_P.csv",
+  podhumLT: "singleCSV/Podhum_LT.csv",
+  podhumP: "singleCSV/Podhum_P.csv",
+  potociLT: "singleCSV/Potoci_LT.csv",
+  potociP: "singleCSV/Potoci_P.csv",
+  zalikLT: "singleCSV/Zalik_LT.csv",
+  zalikP: "singleCSV/Zalik_P.csv",
 };
 
 // Funktion die vor setup() ausgeführt wird - lädt alle CSV-Dateien
