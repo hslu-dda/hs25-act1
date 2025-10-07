@@ -1,0 +1,71 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  display: block;
+}
+#canvasContainer {
+  padding: 10px;
+  margin-top: 6rem;
+}
+
+#panel {
+  position: fixed;
+  top: 2rem;
+
+  width: 50%;
+  margin-left: 1rem;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-size: 16px;
+
+  /* Remove all borders */
+  border: none;
+
+  /* Add only bottom border */
+  border-bottom: 1px solid black;
+
+  /* Optional: remove default styling */
+  outline: none;
+  background: transparent;
+}
+
+/* Optional: change border color on focus */
+input:focus {
+  border-bottom: 2px solid black;
+}
+
+#canvasContainer {
+  padding: 10px;
+}
+
+#contentContainer {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+}
+
+.item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 300px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin: 0.2rem;
+}
+
+.item h3 {
+  margin-top: 0;
+}
+.item p {
+  margin: 0;
+}
