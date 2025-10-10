@@ -1,4 +1,6 @@
 let data;
+let allCommunitiesData = []; // Store all processed indicators
+let allCommunitiesStats = []; // Store all community statistics
 
 function preload() {
   data = loadJSON("data/combined-data_masterfile.json");
@@ -6,89 +8,171 @@ function preload() {
 
 function setup() {
   createCanvas(400, 400);
+
   data = Object.values(data);
   console.log("Loaded data:", data);
 
-  // Get all unique communities
-  const communities = [...new Set(data.map((item) => item.Community))];
-  console.log("Communities:", communities);
+  // Get unique communities from the data
+  const communities = [...new Set(data.map((item) => item.Community))].filter((c) => c != null && c !== "");
+  console.log("Found communities:", communities);
 
   // Process each community
   communities.forEach((community) => {
-    const filteredData = data.filter((item) => item.Community === community);
-    const totalIndicators = filteredData.length;
-    const totalVotes = filteredData.reduce((sum, item) => sum + item.T, 0);
+    console.log(`\n========== Processing ${community} ==========`);
+    processCommunity(community);
+  });
 
-    // Precalculate sums for all codes in this community
-    const codeSums = {};
-    const codeCounts = {};
+  console.log("\n========== ALL PROCESSING COMPLETE ==========");
+  console.log(`Total communities processed: ${allCommunitiesStats.length}`);
+  console.log(`Total indicators with scores: ${allCommunitiesData.length}`);
+}
 
-    filteredData.forEach((item) => {
-      const code1 = item["Code 1 "];
-      const code2 = item["Code 2"];
+function processCommunity(community) {
+  const filteredData = data.filter(
+    (item) => item.Community === community && item["Indicator English"] != null && item["Indicator English"] !== ""
+  );
 
-      // Only add if code is a valid number greater than 0
-      if (typeof code1 === "number" && code1 > 0) {
-        codeSums[code1] = (codeSums[code1] || 0) + item.T;
-        codeCounts[code1] = (codeCounts[code1] || 0) + 1;
+  if (filteredData.length === 0) {
+    console.log(`  ⚠ No data found for ${community}`);
+    return;
+  }
+
+  let totalIndicators = filteredData.length;
+  const totalVotes = filteredData.reduce((sum, item) => sum + item.T, 0);
+
+  console.log(`  Total Indicators: ${totalIndicators}, Total Votes: ${totalVotes}`);
+
+  // ===== TEIL 1: Precalculate für ALLE Focus Groups =====
+
+  const focusGroups = ["F", "M", "Y", "T"]; // Female, Male, Youth, Total
+  const groupData = {};
+
+  focusGroups.forEach((group) => {
+    const { codeSums, codeCounts, dimSums, dimCounts, groupTotalVotes } = filteredData.reduce(
+      (acc, item) => {
+        const code1 = item["Code 1 "];
+        const code2 = item["Code 2"];
+        const dim1 = item["Dimension 1"];
+        const dim2 = item["Dimension 2"];
+
+        // Votes für diese Focus Group
+        const votes = item[group] || 0;
+
+        acc.groupTotalVotes += votes;
+
+        // ===== CODES (Kategorien) =====
+        if (typeof code1 === "number" && code1 > 0) {
+          acc.codeSums[code1] = (acc.codeSums[code1] || 0) + votes;
+          acc.codeCounts[code1] = (acc.codeCounts[code1] || 0) + 1;
+        }
+
+        if (typeof code2 === "number" && code2 > 0) {
+          acc.codeSums[code2] = (acc.codeSums[code2] || 0) + votes;
+          acc.codeCounts[code2] = (acc.codeCounts[code2] || 0) + 1;
+        }
+
+        // ===== DIMENSIONS =====
+        if (dim1 && dim1 !== "" && dim2 && dim2 !== "" && dim1 === dim2) {
+          // Beide gleich - nur einmal zählen
+          acc.dimSums[dim1] = (acc.dimSums[dim1] || 0) + votes;
+          acc.dimCounts[dim1] = (acc.dimCounts[dim1] || 0) + 1;
+        } else {
+          // Unterschiedlich - separat zählen
+          if (dim1 && dim1 !== "") {
+            acc.dimSums[dim1] = (acc.dimSums[dim1] || 0) + votes;
+            acc.dimCounts[dim1] = (acc.dimCounts[dim1] || 0) + 1;
+          }
+          if (dim2 && dim2 !== "") {
+            acc.dimSums[dim2] = (acc.dimSums[dim2] || 0) + votes;
+            acc.dimCounts[dim2] = (acc.dimCounts[dim2] || 0) + 1;
+          }
+        }
+
+        return acc;
+      },
+      {
+        codeSums: {},
+        codeCounts: {},
+        dimSums: {},
+        dimCounts: {},
+        groupTotalVotes: 0,
       }
+    );
 
-      if (typeof code2 === "number" && code2 > 0) {
-        codeSums[code2] = (codeSums[code2] || 0) + item.T;
-        codeCounts[code2] = (codeCounts[code2] || 0) + 1;
-      }
-    });
+    // ===== IMPORTANCE BERECHNEN =====
 
-    // Calculate scores for each item in this community
-    filteredData.forEach((item) => {
-      // Calculate Calc Imp score
-      const calcImpScore = parseFloat(((item.T * totalIndicators) / totalVotes).toFixed(6));
-      item["Calc Imp score"] = calcImpScore;
+    // Durchschnittliche Votes pro Indikator für diese Focus Group
+    const avgVotesPerIndicator = groupTotalVotes / totalIndicators;
 
-      // Calculate Calc Imp Cat1
-      const code1Value = item["Code 1 "];
-      if (typeof code1Value === "number" && code1Value > 0) {
-        const sumVotesInCode1 = codeSums[code1Value];
-        const countIndicatorsWithCode1 = codeCounts[code1Value];
-        const calcImpCat1 = parseFloat(
-          (item.T / sumVotesInCode1 / (countIndicatorsWithCode1 / totalIndicators)).toFixed(6)
-        );
-        item["Calc Imp-Cat1"] = calcImpCat1;
+    // Dimensions-Importance
+    const dimensionImportance = {};
+    for (let dim in dimSums) {
+      const votesPerIndicator = dimSums[dim] / dimCounts[dim];
+      dimensionImportance[dim] = votesPerIndicator / avgVotesPerIndicator;
+    }
 
-        // Check if calculated value differs from original
-        item["Imp Cat1 difference"] = calcImpCat1 !== item["Imp-Cat1"] ? 1 : 0;
-      } else {
-        item["Calc Imp-Cat1"] = null;
-        item["Imp Cat1 difference"] = null;
-      }
+    // Kategorie-Importance
+    const categoryImportance = {};
+    for (let code in codeCounts) {
+      const votesPerIndicator = codeSums[code] / codeCounts[code];
+      categoryImportance[code] = votesPerIndicator / avgVotesPerIndicator;
+    }
 
-      // Calculate Calc Imp Cat2
-      const code2Value = item["Code 2"];
-      if (typeof code2Value === "number" && code2Value > 0) {
-        const sumVotesInCode2 = codeSums[code2Value];
-        const countIndicatorsWithCode2 = codeCounts[code2Value];
-        const calcImpCat2 = parseFloat(
-          (item.T / sumVotesInCode2 / (countIndicatorsWithCode2 / totalIndicators)).toFixed(6)
-        );
-        item["Calc Imp-Cat2"] = calcImpCat2;
+    // Speichere alles für diese Focus Group
+    groupData[group] = {
+      codeSums,
+      codeCounts,
+      dimSums,
+      dimCounts,
+      totalVotes: groupTotalVotes,
+      avgVotesPerIndicator,
+      dimensionImportance,
+      categoryImportance,
+    };
+  });
 
-        // Check if calculated value differs from original
-        item["Imp Cat2 difference"] = calcImpCat2 !== item["Imp-Cat2"] ? 1 : 0;
-      } else {
-        item["Calc Imp-Cat2"] = null;
-        item["Imp Cat2 difference"] = null;
+  // ===== TEIL 2: Berechne Scores für jeden Indikator =====
+
+  filteredData.forEach((item) => {
+    focusGroups.forEach((group) => {
+      const data = groupData[group];
+      const votes = item[group] || 0;
+
+      // 1. Calc Imp score (global)
+      item[`Calc Imp score ${group}`] = parseFloat(((votes * totalIndicators) / data.totalVotes).toFixed(6));
+
+      // 2. Calc Imp-Cat1
+      if (group == "T") {
+        const code1Value = item["Code 1 "];
+        if (typeof code1Value === "number" && code1Value > 0) {
+          item[`Calc Imp-Cat1 ${group}`] = parseFloat(
+            (votes / data.codeSums[code1Value] / (data.codeCounts[code1Value] / totalIndicators)).toFixed(6)
+          );
+        } else {
+          item[`Calc Imp-Cat1 ${group}`] = null;
+        }
+
+        // 3. Calc Imp-Cat2
+        const code2Value = item["Code 2"];
+        if (typeof code2Value === "number" && code2Value > 0) {
+          item[`Calc Imp-Cat2 ${group}`] = parseFloat(
+            (votes / data.codeSums[code2Value] / (data.codeCounts[code2Value] / totalIndicators)).toFixed(6)
+          );
+        } else {
+          item[`Calc Imp-Cat2 ${group}`] = null;
+        }
       }
     });
   });
 
-  // Log a sample to verify
-  console.log("Sample with calculated scores:", data[0]);
+  // Add processed data to global arrays
+  allCommunitiesData.push(...filteredData);
+  allCommunitiesStats.push({
+    community: community,
+    groupData: groupData,
+  });
 
-  // Count total differences
-  const cat1Diffs = data.filter((item) => item["Imp Cat1 difference"] === 1).length;
-  const cat2Diffs = data.filter((item) => item["Imp Cat2 difference"] === 1).length;
-  console.log(`Total Cat1 differences: ${cat1Diffs}`);
-  console.log(`Total Cat2 differences: ${cat2Diffs}`);
+  console.log(`  ✓ ${community} processed successfully`);
 }
 
 function draw() {
@@ -97,7 +181,21 @@ function draw() {
 
 function keyPressed() {
   if (key == "s") {
-    // Save the updated JSON
-    saveJSON(data, "data/masterdata_combined_calculated_scores.json");
+    // Export all indicators with calculated scores
+    saveJSON(allCommunitiesData, "data/all_communities_with_scores.json");
+    console.log("✓ Saved all communities data with scores");
+  }
+
+  if (key == "g") {
+    // Export all community statistics
+    saveJSON(allCommunitiesStats, "data/all_communities_statistics.json");
+    console.log("✓ Saved all communities statistics");
+  }
+
+  if (key == "b") {
+    // Export both files
+    saveJSON(allCommunitiesData, "data/all_communities_with_scores.json");
+    saveJSON(allCommunitiesStats, "data/all_communities_statistics.json");
+    console.log("✓ Saved both files");
   }
 }
