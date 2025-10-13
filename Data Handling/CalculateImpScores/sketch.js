@@ -4,6 +4,22 @@ let allCommunitiesStats = []; // Store all community statistics
 
 function preload() {
   data = loadJSON("data/combined-data_masterfile.json");
+  tree = loadJSON("data/tree_combined.json"); // Load tree structure
+}
+
+// Function to find parent dimension name from a code
+function findParentDimension(code, treeData) {
+  const mainCode = Math.floor(code); // Get integer part (1 from 1.1)
+
+  for (const [dimensionName, categories] of Object.entries(treeData)) {
+    for (const category of categories) {
+      if (Number(category.Num) === mainCode) {
+        return dimensionName;
+      }
+    }
+  }
+
+  return null;
 }
 
 function setup() {
@@ -25,6 +41,7 @@ function setup() {
   console.log("\n========== ALL PROCESSING COMPLETE ==========");
   console.log(`Total communities processed: ${allCommunitiesStats.length}`);
   console.log(`Total indicators with scores: ${allCommunitiesData.length}`);
+  console.log(allCommunitiesData);
 }
 
 function processCommunity(community) {
@@ -52,8 +69,12 @@ function processCommunity(community) {
       (acc, item) => {
         const code1 = item["Code 1 "];
         const code2 = item["Code 2"];
-        const dim1 = item["Dimension 1"];
-        const dim2 = item["Dimension 2"];
+        // const dim1 = item["Dimension 1"];
+        // const dim2 = item["Dimension 2"];
+
+        // ===== GET DIMENSIONS FROM TREE USING CODES =====
+        const dim1 = code1 ? findParentDimension(code1, tree) : null;
+        const dim2 = code2 ? findParentDimension(code2, tree) : null;
 
         // Votes für diese Focus Group
         const votes = item[group] || 0;
@@ -160,6 +181,30 @@ function processCommunity(community) {
           );
         } else {
           item[`Calc Imp-Cat2 ${group}`] = null;
+        }
+
+        // 4. Calc Imp-Dim1
+        const dim11Value = item["Dimension 1"];
+        const code1 = item["Code 1 "];
+        const code2 = item["Code 2"];
+        const dim1Value = code1 ? findParentDimension(code1, tree) : null;
+
+        if (dim1Value && dim1Value !== "") {
+          item[`Calc Imp-Dim1 ${group}`] = parseFloat(
+            (votes / data.dimSums[dim1Value] / (data.dimCounts[dim1Value] / totalIndicators)).toFixed(6)
+          );
+        } else {
+          item[`Calc Imp-Dim1 ${group}`] = null;
+        }
+
+        // 5. Calc Imp-Dim2
+        const dim2Value = item["Dimension 2"];
+        if (dim2Value && dim2Value !== "") {
+          item[`Calc Imp-Dim2 ${group}`] = parseFloat(
+            (votes / data.dimSums[dim2Value] / (data.dimCounts[dim2Value] / totalIndicators)).toFixed(6)
+          );
+        } else {
+          item[`Calc Imp-Dim2 ${group}`] = null;
         }
       }
     });
